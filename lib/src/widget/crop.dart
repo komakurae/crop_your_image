@@ -167,6 +167,20 @@ class Crop extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final effectiveFormatDetector = formatDetector ??
+        (data) {
+          final format = img.findFormatForData(data);
+
+          return switch (format) {
+            img.ImageFormat.png => ImageFormat.png,
+            img.ImageFormat.jpg => ImageFormat.jpeg,
+            img.ImageFormat.webp => ImageFormat.webp,
+            img.ImageFormat.bmp => ImageFormat.bmp,
+            img.ImageFormat.ico => ImageFormat.ico,
+            _ => ImageFormat.png,
+          };
+        };
+
     return LayoutBuilder(
       builder: (c, constraints) {
         final newData = MediaQuery.of(c).copyWith(
@@ -197,7 +211,7 @@ class Crop extends StatelessWidget {
             willUpdateScale: willUpdateScale,
             scrollZoomSensitivity: scrollZoomSensitivity,
             imageCropper: imageCropper,
-            formatDetector: formatDetector,
+            formatDetector: effectiveFormatDetector,
             imageParser: imageParser,
           ),
         );
@@ -778,12 +792,13 @@ FutureOr<Uint8List> _cropFunc(List<dynamic> args) {
   final rect = args[2] as Rect;
   final withCircleShape = args[3] as bool;
 
-  final outputFormat = args[4] as ImageFormat?;
+  final outputFormat = (args[4] as ImageFormat? ?? ImageFormat.jpeg);
 
   return cropper.call(
     original: originalImage,
     topLeft: Offset(rect.left, rect.top),
     bottomRight: Offset(rect.right, rect.bottom),
+    outputFormat: outputFormat,
     shape: withCircleShape ? ImageShape.circle : ImageShape.rectangle,
   );
 }

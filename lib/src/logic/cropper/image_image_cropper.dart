@@ -38,6 +38,14 @@ class ImageImageCropper extends ImageCropper<Image> {
       throw NegativeSizeError(topLeft: topLeft, bottomRight: bottomRight);
     }
 
+    final encode = switch (outputFormat) {
+      ImageFormat.bmp => encodeBmp,
+      ImageFormat.ico => encodeIco,
+      ImageFormat.jpeg => encodeJpg,
+      ImageFormat.png => encodePng,
+      _ => encodeJpg,
+    };
+
     final function = switch (shape) {
       ImageShape.rectangle => _doCrop,
       ImageShape.circle => _doCropCircle,
@@ -45,6 +53,7 @@ class ImageImageCropper extends ImageCropper<Image> {
 
     return function(
       original,
+      encode: encode,
       topLeft: topLeft,
       size: Size(
         bottomRight.dx - topLeft.dx,
@@ -58,11 +67,12 @@ class ImageImageCropper extends ImageCropper<Image> {
 /// this method is supposed to be called only via compute()
 Uint8List _doCrop(
   Image original, {
+  required Uint8List Function(Image) encode,
   required Offset topLeft,
   required Size size,
 }) {
   return Uint8List.fromList(
-    encodePng(
+    encode(
       copyCrop(
         original,
         x: topLeft.dx.toInt(),
@@ -78,6 +88,7 @@ Uint8List _doCrop(
 /// this method is supposed to be called only via compute()
 Uint8List _doCropCircle(
   Image original, {
+  required Uint8List Function(Image) encode,
   required Offset topLeft,
   required Size size,
 }) {
@@ -86,7 +97,7 @@ Uint8List _doCropCircle(
     topLeft.dy + size.height / 2,
   );
   return Uint8List.fromList(
-    encodePng(
+    encode(
       copyCropCircle(
         original,
         centerX: center.xi,
