@@ -11,6 +11,8 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/gestures.dart';
 
+import 'package:image/image.dart' as img;
+
 typedef ViewportBasedRect = Rect;
 typedef ImageBasedRect = Rect;
 
@@ -377,6 +379,7 @@ class _CropEditorState extends State<_CropEditor> {
     _lastImage = image;
 
     final format = formatDetector?.call(image);
+
     final future = compute(
       _parseFunc,
       [widget.imageParser, format, image],
@@ -775,8 +778,7 @@ FutureOr<Uint8List> _cropFunc(List<dynamic> args) {
   final rect = args[2] as Rect;
   final withCircleShape = args[3] as bool;
 
-  // TODO(chooyan-eng): currently always PNG
-  // final outputFormat = args[4] as ImageFormat?;
+  final outputFormat = args[4] as ImageFormat?;
 
   return cropper.call(
     original: originalImage,
